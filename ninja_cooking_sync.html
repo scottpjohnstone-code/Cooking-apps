@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninja Cooking Sync App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        ninja: {
+                            orange: '#f97316',
+                            cyan: '#06b6d4',
+                            emerald: '#10b981',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        /* Custom number input styling */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-full flex flex-col transition-colors duration-200 selection:bg-orange-500 selection:text-white">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                    <i class="fa-solid fa-fire-burner text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg bg-gradient-to-r from-orange-400 to-amber-200 bg-clip-text text-transparent">NinjaSync Pro</h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Multi-Appliance Kitchen Synchronizer</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="app.toggleTheme()" class="p-2 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-800 transition" title="Toggle Light/Dark Theme">
+                    <i class="fa-solid fa-moon text-base" id="theme_icon"></i>
+                </button>
+                <button onclick="app.resetAll()" class="px-3.5 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-red-400 hover:text-red-300 rounded-xl border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-rotate-right"></i> Reset All
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Input Section: 3 Appliances -->
+        <section class="lg:col-span-7 flex flex-col space-y-5">
+            
+            <div class="flex items-center justify-between pb-1">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-orange-500"></i> Appliance Inputs
+                    </h2>
+                    <p class="text-xs text-slate-400">All fields are blank by default. Decimal values are supported (e.g. 0.5 mins = 30 secs).</p>
+                </div>
+            </div>
+
+            <!-- Appliance 1: Big Ninja Grill -->
+            <div class="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl p-5 shadow-xl relative overflow-hidden transition">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-orange-500"></div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold text-sm border border-orange-500/20">
+                            <i class="fa-solid fa-fire text-base"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-100">Big Ninja Grill</h3>
+                            <p class="text-xs text-slate-400">Appliance #1</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-semibold px-2.5 py-1 bg-orange-500/10 text-orange-400 rounded-lg border border-orange-500/20">
+                        Includes Warm-Up
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Setting / Temp / Mode</label>
+                        <input type="text" id="grill_setting" autocomplete="off" placeholder="e.g., Air Crisp 400°F" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-orange-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Warm-up Time (mins)</label>
+                        <input type="number" id="grill_warmup" autocomplete="off" step="any" min="0" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-orange-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Cooking Time (mins)</label>
+                        <input type="number" id="grill_cook" autocomplete="off" step="any" min="0" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-orange-500 transition">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Flipping / Stirring Time (mins)</label>
+                        <input type="number" id="grill_flip" autocomplete="off" step="any" min="0" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-orange-500 transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appliance 2: Small Ninja Drawer 1 -->
+            <div class="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl p-5 shadow-xl relative overflow-hidden transition">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-cyan-500"></div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold text-sm border border-cyan-500/20">
+                            <i class="fa-solid fa-box-archive text-base"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-100">Small Ninja Drawer 1</h3>
+                            <p class="text-xs text-slate-400">Appliance #2</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-semibold px-2.5 py-1 bg-cyan-500/10 text-cyan-400 rounded-lg border border-cyan-500/20">
+                        Dual Zone Drawer 1
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Setting / Temp / Mode</label>
+                        <input type="text" id="d1_setting" autocomplete="off" placeholder="e.g., Bake 375°F" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Cooking Time (mins)</label>
+                        <input type="number" id="d1_cook" autocomplete="off" step="any" min="0" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Flipping / Stirring Time (mins)</label>
+                        <input type="number" id="d1_flip" autocomplete="off" step="any" min="0" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appliance 3: Small Ninja Drawer 2 -->
+            <div class="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl p-5 shadow-xl relative overflow-hidden transition">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/20">
+                            <i class="fa-solid fa-box-open text-base"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-100">Small Ninja Drawer 2</h3>
+                            <p class="text-xs text-slate-400">Appliance #3</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-semibold px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
+                        Dual Zone Drawer 2
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Setting / Temp / Mode</label>
+                        <input type="text" id="d2_setting" autocomplete="off" placeholder="e.g., Air Fry 390°F" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Cooking Time (mins)</label>
+                        <input type="number" id="d2_cook" autocomplete="off" step="any" min="0" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Flipping / Stirring Time (mins)</label>
+                        <input type="number" id="d2_flip" autocomplete="off" step="any" min="0" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <button onclick="app.calculateSchedule()" class="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold rounded-2xl shadow-xl shadow-orange-500/20 transition flex items-center justify-center gap-2 text-base active:scale-[0.99]">
+                <i class="fa-solid fa-calculator"></i> Calculate Synchronization Schedule
+            </button>
+
+        </section>
+
+        <!-- Output Section: Schedule & Countdown Guide -->
+        <section class="lg:col-span-5 flex flex-col space-y-6">
+            
+            <!-- Schedule Output Box -->
+            <div id="schedule_card" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                    <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-orange-500"></i> Sync Schedule
+                    </h3>
+                    <span id="total_badge" class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full font-mono font-medium border border-slate-700">
+                        Total Session: --
+                    </span>
+                </div>
+
+                <div id="schedule_output" class="py-4 flex-1">
+                    <div class="text-center py-10 text-slate-500 text-sm">
+                        <i class="fa-solid fa-kitchen-set text-3xl mb-3 block text-slate-700"></i>
+                        Fill in your appliance cooking times on the left and click <b>"Calculate Synchronization Schedule"</b>.
+                    </div>
+                </div>
+
+                <!-- Start Live Session Control -->
+                <div id="start_live_container" class="pt-3 border-t border-slate-800 hidden">
+                    <button id="start_live_btn" onclick="app.toggleLiveSession()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-play"></i> Start Live Sync Session
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Session Multi-Timer Dashboard -->
+            <div id="live_dashboard" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl hidden">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        <h3 class="font-bold text-slate-100 text-sm">Live Session Running</h3>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="app.pauseLiveSession()" id="pause_btn" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-amber-400 rounded-lg border border-slate-700 transition">
+                            <i class="fa-solid fa-pause"></i> Pause
+                        </button>
+                        <button onclick="app.stopLiveSession()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-red-400 rounded-lg border border-slate-700 transition">
+                            <i class="fa-solid fa-stop"></i> Stop
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Timers List -->
+                <div class="space-y-3">
+                    <!-- Grill Timer -->
+                    <div id="timer_card_grill" class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between transition">
+                        <div>
+                            <span class="text-xs font-bold text-orange-400 uppercase tracking-wider block">Big Ninja Grill</span>
+                            <span id="live_grill_status" class="text-xs text-slate-400 font-medium">Waiting...</span>
+                        </div>
+                        <div class="text-right">
+                            <div id="live_grill_timer" class="font-mono text-xl font-bold text-slate-100">00:00</div>
+                            <span id="live_grill_sub" class="text-[10px] text-slate-500">Remaining</span>
+                        </div>
+                    </div>
+
+                    <!-- Drawer 1 Timer -->
+                    <div id="timer_card_d1" class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between transition">
+                        <div>
+                            <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider block">Small Drawer 1</span>
+                            <span id="live_d1_status" class="text-xs text-slate-400 font-medium">Waiting...</span>
+                        </div>
+                        <div class="text-right">
+                            <div id="live_d1_timer" class="font-mono text-xl font-bold text-slate-100">00:00</div>
+                            <span id="live_d1_sub" class="text-[10px] text-slate-500">Remaining</span>
+                        </div>
+                    </div>
+
+                    <!-- Drawer 2 Timer -->
+                    <div id="timer_card_d2" class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between transition">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider block">Small Drawer 2</span>
+                            <span id="live_d2_status" class="text-xs text-slate-400 font-medium">Waiting...</span>
+                        </div>
+                        <div class="text-right">
+                            <div id="live_d2_timer" class="font-mono text-xl font-bold text-slate-100">00:00</div>
+                            <span id="live_d2_sub" class="text-[10px] text-slate-500">Remaining</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 border border-slate-700 text-slate-100 px-4 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 max-w-sm">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg" id="toast_icon"></i>
+        <div>
+            <div class="font-semibold text-xs" id="toast_title">Notification</div>
+            <div class="text-xs text-slate-400" id="toast_msg">Message body</div>
+        </div>
+    </div>
+
+    <script>
+        class NinjaSyncApp {
+            constructor() {
+                this.scheduleData = null;
+                this.timerInterval = null;
+                this.isRunning = false;
+                this.isPaused = false;
+                this.remainingSeconds = 0;
+                this.totalSeconds = 0;
+                this.audioCtx = null;
+                this.alertsTriggered = {};
+            }
+
+            // Audio notification tone using Web Audio API
+            playBeep(freq = 587.33, duration = 0.5) {
+                try {
+                    if (!this.audioCtx) {
+                        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (this.audioCtx.state === 'suspended') {
+                        this.audioCtx.resume();
+                    }
+                    const osc = this.audioCtx.createOscillator();
+                    const gain = this.audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.15, this.audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.audioCtx.destination);
+                    osc.start();
+                    osc.stop(this.audioCtx.currentTime + duration);
+                } catch (e) {
+                    console.log('Audio playback prevented');
+                }
+            }
+
+            // Toast message trigger
+            showToast(title, msg, isAlert = false) {
+                const toast = document.getElementById('toast');
+                document.getElementById('toast_title').innerText = title;
+                document.getElementById('toast_msg').innerText = msg;
+                const icon = document.getElementById('toast_icon');
+                if (isAlert) {
+                    icon.className = 'fa-solid fa-bell text-amber-400 text-lg';
+                } else {
+                    icon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+                }
+                toast.classList.remove('translate-y-24', 'opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('translate-y-24', 'opacity-0');
+                }, 4000);
+            }
+
+            // Helper to format minutes to "Xm Ys" or "Xm"
+            formatMinsToMinutesSeconds(decimalMins) {
+                const totalSecs = Math.max(0, Math.round(decimalMins * 60));
+                const mins = Math.floor(totalSecs / 60);
+                const secs = totalSecs % 60;
+                if (mins === 0) return `${secs}s`;
+                if (secs === 0) return `${mins}m`;
+                return `${mins}m ${secs}s`;
+            }
+
+            // Helper to format total seconds to MM:SS display
+            formatSecondsToMMSS(totalSecs) {
+                const secs = Math.max(0, Math.round(totalSecs));
+                const m = Math.floor(secs / 60);
+                const s = secs % 60;
+                return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            }
+
+            // Main Schedule Calculator Logic
+            calculateSchedule() {
+                // Parse inputs, supporting decimal numbers cleanly
+                const grill = {
+                    id: 'grill',
+                    name: 'Big Ninja Grill',
+                    setting: document.getElementById('grill_setting').value.trim(),
+                    warmup: parseFloat(document.getElementById('grill_warmup').value) || 0,
+                    cook: parseFloat(document.getElementById('grill_cook').value) || 0,
+                    flip: parseFloat(document.getElementById('grill_flip').value) || 0,
+                    color: 'orange'
+                };
+
+                const d1 = {
+                    id: 'd1',
+                    name: 'Small Drawer 1',
+                    setting: document.getElementById('d1_setting').value.trim(),
+                    warmup: 0,
+                    cook: parseFloat(document.getElementById('d1_cook').value) || 0,
+                    flip: parseFloat(document.getElementById('d1_flip').value) || 0,
+                    color: 'cyan'
+                };
+
+                const d2 = {
+                    id: 'd2',
+                    name: 'Small Drawer 2',
+                    setting: document.getElementById('d2_setting').value.trim(),
+                    warmup: 0,
+                    cook: parseFloat(document.getElementById('d2_cook').value) || 0,
+                    flip: parseFloat(document.getElementById('d2_flip').value) || 0,
+                    color: 'emerald'
+                };
+
+                // Total active duration = Warmup + Cook + Flipping/Stirring
+                grill.total = grill.warmup + grill.cook + grill.flip;
+                d1.total = d1.cook + d1.flip;
+                d2.total = d2.cook + d2.flip;
+
+                const appliances = [grill, d1, d2];
+                const activeAppliances = appliances.filter(a => a.total > 0);
+
+                if (activeAppliances.length === 0) {
+                    document.getElementById('schedule_output').innerHTML = `
+                        <div class="text-center py-8 text-amber-400 text-sm">
+                            <i class="fa-solid fa-circle-exclamation text-xl mb-2 block"></i>
+                            Please enter cooking time for at least one appliance.
+                        </div>
+                    `;
+                    document.getElementById('start_live_container').classList.add('hidden');
+                    return;
+                }
+
+                // Longest appliance determines master finish time (T = 0)
+                const maxDuration = Math.max(...appliances.map(a => a.total));
+                document.getElementById('total_badge').innerText = `Total Session: ${this.formatMinsToMinutesSeconds(maxDuration)}`;
+
+                // Calculate start offsets from session start
+                appliances.forEach(app => {
+                    app.startOffset = maxDuration - app.total;
+                });
+
+                // Identify master appliance(s) starting at T = 0
+                const masterAppliances = activeAppliances.filter(a => Math.abs(a.startOffset) < 0.001);
+                const delayedAppliances = activeAppliances.filter(a => a.startOffset > 0.001);
+
+                this.scheduleData = {
+                    maxDuration,
+                    appliances,
+                    activeAppliances,
+                    masterAppliances,
+                    delayedAppliances
+                };
+
+                let html = '<div class="space-y-4 text-sm">';
+
+                // Step 1: Session Start Instruction
+                const masterNames = masterAppliances.map(a => `<b>${a.name}</b>${a.setting ? ` (${a.setting})` : ''}`).join(' and ');
+                html += `
+                    <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-xl relative">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs font-bold text-orange-400 uppercase tracking-wide">Session Start (T = 0 mins)</span>
+                            <span class="text-[10px] bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded font-medium border border-orange-500/20">Start First</span>
+                        </div>
+                        <p class="text-slate-200">Start ${masterNames} immediately.</p>
+                    </div>
+                `;
+
+                // Step 2: Delayed Start Rules with Countdown Triggers
+                if (delayedAppliances.length > 0) {
+                    const refMaster = masterAppliances[0]; // Reference appliance
+                    
+                    delayedAppliances.forEach(delayed => {
+                        // Countdown value on refMaster when delayed appliance needs to start
+                        const refCountdownTrigger = refMaster.total - delayed.startOffset;
+                        const triggerFormatted = this.formatMinsToMinutesSeconds(refCountdownTrigger);
+                        const delayFormatted = this.formatMinsToMinutesSeconds(delayed.startOffset);
+
+                        html += `
+                            <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-xl">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-bold text-cyan-400 uppercase tracking-wide">Delayed Start (+${delayFormatted})</span>
+                                    <span class="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded font-medium border border-cyan-500/20">Countdown Trigger</span>
+                                </div>
+                                <p class="text-slate-200 mb-1">When <b>${refMaster.name}</b> countdown reaches <span class="text-orange-400 font-bold">${triggerFormatted}</span>:</p>
+                                <p class="text-xs text-slate-400">➔ Start <b>${delayed.name}</b>${delayed.setting ? ` (${delayed.setting})` : ''}.</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Step 3: Appliance Breakdown Summary Table
+                html += `
+                    <div class="mt-4 pt-3 border-t border-slate-800">
+                        <div class="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Duration Summary</div>
+                        <div class="space-y-2 text-xs">
+                `;
+
+                activeAppliances.forEach(app => {
+                    const details = [];
+                    if (app.warmup > 0) details.push(`Warm-up: ${this.formatMinsToMinutesSeconds(app.warmup)}`);
+                    if (app.cook > 0) details.push(`Cook: ${this.formatMinsToMinutesSeconds(app.cook)}`);
+                    if (app.flip > 0) details.push(`Flip/Stir: ${this.formatMinsToMinutesSeconds(app.flip)}`);
+
+                    html += `
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
+                            <div>
+                                <span class="font-semibold text-slate-200">${app.name}</span>
+                                <span class="text-[10px] text-slate-500 block">${details.join(' | ')}</span>
+                            </div>
+                            <div class="text-right font-mono font-bold text-slate-300">
+                                ${this.formatMinsToMinutesSeconds(app.total)}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div></div>`;
+
+                document.getElementById('schedule_output').innerHTML = html;
+                document.getElementById('start_live_container').classList.remove('hidden');
+                this.showToast('Schedule Synchronized', 'Master sync timings computed successfully.');
+            }
+
+            toggleLiveSession() {
+                if (this.isRunning) {
+                    this.stopLiveSession();
+                } else {
+                    this.startLiveSession();
+                }
+            }
+
+            startLiveSession() {
+                if (!this.scheduleData) return;
+                this.isRunning = true;
+                this.isPaused = false;
+                this.alertsTriggered = {};
+                
+                this.totalSeconds = Math.round(this.scheduleData.maxDuration * 60);
+                this.remainingSeconds = this.totalSeconds;
+
+                document.getElementById('live_dashboard').classList.remove('hidden');
+                document.getElementById('start_live_btn').innerHTML = '<i class="fa-solid fa-rotate-right"></i> Restart Live Session';
+                document.getElementById('start_live_btn').className = 'w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-lg shadow-amber-600/20 transition flex items-center justify-center gap-2 text-sm';
+                
+                clearInterval(this.timerInterval);
+                this.updateTimerUI();
+                this.timerInterval = setInterval(() => this.tick(), 1000);
+                this.playBeep(880, 0.3);
+                this.showToast('Live Session Active', 'Timers running in real time.');
+            }
+
+            pauseLiveSession() {
+                if (!this.isRunning) return;
+                this.isPaused = !this.isPaused;
+                const btn = document.getElementById('pause_btn');
+                if (this.isPaused) {
+                    btn.innerHTML = '<i class="fa-solid fa-play"></i> Resume';
+                    btn.className = 'px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-emerald-400 rounded-lg border border-slate-700 transition';
+                } else {
+                    btn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+                    btn.className = 'px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-amber-400 rounded-lg border border-slate-700 transition';
+                }
+            }
+
+            stopLiveSession() {
+                clearInterval(this.timerInterval);
+                this.isRunning = false;
+                this.isPaused = false;
+                document.getElementById('live_dashboard').classList.add('hidden');
+                document.getElementById('start_live_btn').innerHTML = '<i class="fa-solid fa-play"></i> Start Live Sync Session';
+                document.getElementById('start_live_btn').className = 'w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2 text-sm';
+                this.showToast('Session Stopped', 'Live timers reset.', true);
+            }
+
+            tick() {
+                if (this.isPaused) return;
+
+                if (this.remainingSeconds <= 0) {
+                    this.stopLiveSession();
+                    this.playBeep(1046.5, 0.8);
+                    this.showToast('Cooking Finished!', 'All 3 appliances completed at the exact same time!', false);
+                    return;
+                }
+
+                this.remainingSeconds--;
+                this.updateTimerUI();
+            }
+
+            updateTimerUI() {
+                const elapsedSeconds = this.totalSeconds - this.remainingSeconds;
+                const elapsedMins = elapsedSeconds / 60;
+                const d = this.scheduleData;
+
+                d.appliances.forEach(app => {
+                    const statusEl = document.getElementById(`live_${app.id}_status`);
+                    const timerEl = document.getElementById(`live_${app.id}_timer`);
+                    const cardEl = document.getElementById(`timer_card_${app.id}`);
+
+                    if (app.total <= 0) {
+                        statusEl.innerText = 'Not set';
+                        timerEl.innerText = '--:--';
+                        cardEl.className = 'bg-slate-950/40 p-3.5 rounded-xl border border-slate-800/50 opacity-40';
+                        return;
+                    }
+
+                    const applianceElapsed = elapsedMins - app.startOffset;
+
+                    if (applianceElapsed < 0) {
+                        // Appliance is waiting to start
+                        const timeUntilStartSecs = Math.abs(applianceElapsed) * 60;
+                        statusEl.innerText = `Starts in ${this.formatMinsToMinutesSeconds(-applianceElapsed)}`;
+                        statusEl.className = 'text-xs text-amber-400 font-medium';
+                        timerEl.innerText = this.formatSecondsToMMSS(app.total * 60);
+                        cardEl.className = 'bg-slate-950 p-3.5 rounded-xl border border-amber-500/30';
+                    } else if (applianceElapsed <= app.total) {
+                        // Appliance is actively running
+                        const remainingSecs = (app.total - applianceElapsed) * 60;
+                        timerEl.innerText = this.formatSecondsToMMSS(remainingSecs);
+
+                        if (applianceElapsed === 0 || (applianceElapsed > 0 && !this.alertsTriggered[app.id + '_start'])) {
+                            this.alertsTriggered[app.id + '_start'] = true;
+                            this.playBeep(783.99, 0.4);
+                            this.showToast(`START ${app.name}!`, `Turn on ${app.name} now${app.setting ? ` (${app.setting})` : ''}.`, true);
+                        }
+
+                        if (app.warmup > 0 && applianceElapsed <= app.warmup) {
+                            statusEl.innerText = 'Warming up...';
+                            statusEl.className = 'text-xs text-orange-400 font-medium animate-pulse';
+                        } else {
+                            statusEl.innerText = 'Cooking active';
+                            statusEl.className = 'text-xs text-emerald-400 font-medium';
+                        }
+
+                        cardEl.className = 'bg-slate-950 p-3.5 rounded-xl border border-emerald-500/40 shadow-sm';
+                    } else {
+                        // Finished
+                        statusEl.innerText = 'Finished!';
+                        statusEl.className = 'text-xs text-emerald-400 font-bold';
+                        timerEl.innerText = '00:00';
+                        cardEl.className = 'bg-slate-950 p-3.5 rounded-xl border border-slate-800 opacity-60';
+                    }
+                });
+            }
+
+            // Theme Switcher
+            toggleTheme() {
+                const html = document.documentElement;
+                const themeIcon = document.getElementById('theme_icon');
+                if (html.classList.contains('dark')) {
+                    html.classList.remove('dark');
+                    themeIcon.className = 'fa-solid fa-sun text-base';
+                } else {
+                    html.classList.add('dark');
+                    themeIcon.className = 'fa-solid fa-moon text-base';
+                }
+            }
+
+            // 1-Click Reset for ALL inputs
+            resetAll() {
+                this.stopLiveSession();
+                const inputIds = [
+                    'grill_setting', 'grill_warmup', 'grill_cook', 'grill_flip',
+                    'd1_setting', 'd1_cook', 'd1_flip',
+                    'd2_setting', 'd2_cook', 'd2_flip'
+                ];
+                inputIds.forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+
+                document.getElementById('schedule_output').innerHTML = `
+                    <div class="text-center py-10 text-slate-500 text-sm">
+                        <i class="fa-solid fa-kitchen-set text-3xl mb-3 block text-slate-700"></i>
+                        Fill in your appliance cooking times on the left and click <b>"Calculate Synchronization Schedule"</b>.
+                    </div>
+                `;
+                document.getElementById('total_badge').innerText = 'Total Session: --';
+                document.getElementById('start_live_container').classList.add('hidden');
+                this.showToast('Reset Complete', 'All input fields cleared.');
+            }
+        }
+
+        // Initialize application instance
+        const app = new NinjaSyncApp();
+    </script>
+</body>
+</html>
